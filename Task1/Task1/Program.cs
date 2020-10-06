@@ -7,30 +7,24 @@ namespace Task1
 {
     class Program
     {
-        private static void DisplayResult(string message)
+        private static void DisplayResult(PredictionResult predictionResult)
+        {
+            Console.WriteLine(predictionResult.File + " " + predictionResult.Prediction);
+        }
+
+        private static void DisplayMessage(string message)
         {
             Console.WriteLine(message);
         }
 
-        private static void DisplayInformation(string message)
-        {
-            Console.WriteLine(message);
-        }
-
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Classifier classifier = new Classifier();
 
             classifier.Result += DisplayResult;
-            classifier.Information += DisplayInformation;
+            classifier.Message += DisplayMessage;
 
-            Task.Run(() =>
-            {
-                while (Console.ReadKey(true).Key != ConsoleKey.Escape) { }
-                classifier.Cancel();
-            });
-
-            classifier.PredictAll(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + "\\Images"); 
+            await classifier.PredictAll(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + "\\Images");
         }
     }
 }

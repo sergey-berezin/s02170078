@@ -12,15 +12,25 @@ using System.Threading.Tasks;
 
 namespace ImageRecognitionLibrary
 {
+    public class PredictionResult
+    {
+        public string Path { get; set; }
+        public string File { get; set; }
+        public string Prediction { get; set; }
+    }
+
     public class Classifier
     {
-        public delegate void ImageRecognitionHandler(string message);
+       
+        public delegate void ImageRecognitionHandler(PredictionResult predictionResult);
+
+        public delegate void MessageHandler(string message);
 
         public event ImageRecognitionHandler Result;
 
-        public event ImageRecognitionHandler Information;
+        public event MessageHandler Message;
 
-        private CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
+        private CancellationTokenSource CancelTokenSource = new CancellationTokenSource();
 
         public string ModelFolder = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + "\\Model";
 
@@ -43,56 +53,47 @@ namespace ImageRecognitionLibrary
 
         public void Cancel()
         {
-            cancelTokenSource.Cancel();
+            CancelTokenSource.Cancel();
         }
 
-        public void PredictAll(string targetDirectory)
+        public async Task PredictAll(string targetDirectory)
         {
             DirectoryInfo dir = new DirectoryInfo(targetDirectory);
 
             if (!dir.Exists)
             {
-                Information?.Invoke("Директория не найдена.");
+                Message?.Invoke("Директория не найдена.");
                 return;
             }
 
-            CancellationToken token = cancelTokenSource.Token;
+            CancellationToken token = CancelTokenSource.Token;
 
             var tasks = new List<Task>();
 
             foreach (var curImg in dir.GetFiles())
             {
-
                 tasks.Add(Task.Factory.StartNew((img) =>
                 {
                     FileInfo pImg = (FileInfo)img;
-                    string prediction = Predict(pImg.FullName);
-                    Result?.Invoke(pImg.Name + " " + prediction);
+                    PredictionResult result = new PredictionResult { Path = pImg.FullName, File = pImg.Name, Prediction = Predict(pImg.FullName) };
+                    Result?.Invoke(result);
+                    token.ThrowIfCancellationRequested();
                 }, curImg, token));
             }
 
+            Task t = Task.WhenAll(tasks);
+
             try
             {
-                Task.WaitAll(tasks.ToArray());
+                await t;
             }
-            catch (AggregateException e)
+            catch (OperationCanceledException ex)
             {
-                foreach (var ie in e.InnerExceptions)
-                {
-                    if (ie is OperationCanceledException)
-                    {
-                        Information?.Invoke("Процесс был прекращен.");
-                        break;
-                    }
-                    else
-                    {
-                        Information?.Invoke(ie.GetType().Name + ": " + ie.Message);
-                    }
-                }
+                Message?.Invoke("Процесс был прекращен.");
             }
             finally
             {
-                cancelTokenSource.Dispose();
+                CancelTokenSource.Dispose();
             }
         }
 
