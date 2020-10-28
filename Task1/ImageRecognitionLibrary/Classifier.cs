@@ -10,18 +10,24 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
+
 namespace ImageRecognitionLibrary
 {
     public class PredictionResult
     {
+      
         public string Path { get; set; }
         public string File { get; set; }
         public string Prediction { get; set; }
+        public override string ToString()
+        {
+            return Prediction;
+        }
     }
 
     public class Classifier
     {
-       
+        
         public delegate void ImageRecognitionHandler(PredictionResult predictionResult);
 
         public delegate void MessageHandler(string message);
@@ -30,7 +36,7 @@ namespace ImageRecognitionLibrary
 
         public event MessageHandler Message;
 
-        private CancellationTokenSource CancelTokenSource = new CancellationTokenSource();
+        private CancellationTokenSource CancelTokenSource;
 
         public string ModelFolder = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + "\\Model";
 
@@ -43,8 +49,9 @@ namespace ImageRecognitionLibrary
         public int TargetHeight { get; set; }
 
 
-        public Classifier(string modelFile = "\\model.onnx", string labelFile = "\\labels.txt", int targetWidth = 28, int targetHeight = 28)
+        public Classifier(string modelFolder, string modelFile = "\\model.onnx", string labelFile = "\\labels.txt", int targetWidth = 28, int targetHeight = 28)
         {
+            ModelFolder = modelFolder;
             ModelFile = modelFile;
             classLabels = File.ReadAllLines(ModelFolder + labelFile);
             TargetWidth = targetWidth;
@@ -53,6 +60,7 @@ namespace ImageRecognitionLibrary
 
         public void Cancel()
         {
+            Message?.Invoke("Остановка");
             CancelTokenSource.Cancel();
         }
 
@@ -65,7 +73,7 @@ namespace ImageRecognitionLibrary
                 Message?.Invoke("Директория не найдена.");
                 return;
             }
-
+            CancelTokenSource = new CancellationTokenSource();
             CancellationToken token = CancelTokenSource.Token;
 
             var tasks = new List<Task>();
@@ -77,12 +85,11 @@ namespace ImageRecognitionLibrary
                     FileInfo pImg = (FileInfo)img;
                     PredictionResult result = new PredictionResult { Path = pImg.FullName, File = pImg.Name, Prediction = Predict(pImg.FullName) };
                     Result?.Invoke(result);
-                    token.ThrowIfCancellationRequested();
                 }, curImg, token));
             }
 
             Task t = Task.WhenAll(tasks);
-
+            
             try
             {
                 await t;
@@ -90,10 +97,6 @@ namespace ImageRecognitionLibrary
             catch (OperationCanceledException ex)
             {
                 Message?.Invoke("Процесс был прекращен.");
-            }
-            finally
-            {
-                CancelTokenSource.Dispose();
             }
         }
 
