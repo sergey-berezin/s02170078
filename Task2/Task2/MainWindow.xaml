@@ -38,7 +38,7 @@
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <ListBox ItemsSource="{Binding Selected}"  x:Name="lbAll_Copy" Margin="433,185,82,106">
+        <ListBox ItemsSource="{Binding Selected}"  x:Name="lbSelected" Margin="433,185,82,106">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Margin="0 0 0 5">

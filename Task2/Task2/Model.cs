@@ -116,9 +116,32 @@ namespace Task2
         public BitmapImage Image { get; set; }
     }
 
-    public class OutputNumber
+    public class OutputNumber : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public void OnPropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
         public string Label { get; set; }
-        public int Number { get; set; }
+
+        private int number;
+
+        public int Number {
+            get
+            {
+                return number;
+            }
+            set
+            {
+                number = value;
+                OnPropertyChanged("Number");
+            }
+        }
     }
 }
