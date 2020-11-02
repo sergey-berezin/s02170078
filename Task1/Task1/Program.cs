@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using ImageRecognitionLibrary;
@@ -19,8 +19,7 @@ namespace Task1
 
         static async Task Main(string[] args)
         {
-            Classifier classifier = new Classifier();
-
+            Classifier classifier = new Classifier(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + "\\Model");
             classifier.Result += DisplayResult;
             classifier.Message += DisplayMessage;
 
