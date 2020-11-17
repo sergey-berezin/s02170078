@@ -10,12 +10,10 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-
 namespace ImageRecognitionLibrary
 {
     public class PredictionResult
-    {
-      
+    {     
         public string Path { get; set; }
         public string File { get; set; }
         public string Prediction { get; set; }
@@ -27,7 +25,6 @@ namespace ImageRecognitionLibrary
 
     public class Classifier
     {
-        
         public delegate void ImageRecognitionHandler(PredictionResult predictionResult);
 
         public delegate void MessageHandler(string message);
@@ -73,7 +70,9 @@ namespace ImageRecognitionLibrary
                 Message?.Invoke("Директория не найдена.");
                 return;
             }
+
             CancelTokenSource = new CancellationTokenSource();
+          
             CancellationToken token = CancelTokenSource.Token;
 
             var tasks = new List<Task>();
@@ -89,7 +88,7 @@ namespace ImageRecognitionLibrary
             }
 
             Task t = Task.WhenAll(tasks);
-            
+
             try
             {
                 await t;
