@@ -36,7 +36,7 @@ namespace ImageRecognitionLibrary
 
         public event MessageHandler Message;
 
-        private CancellationTokenSource CancelTokenSource;
+        public CancellationTokenSource CancelTokenSource;
 
         public string ModelFolder = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + "\\Model";
 
