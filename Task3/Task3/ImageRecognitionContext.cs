@@ -35,7 +35,6 @@ namespace Task3
 
         public ImageRecognitionContext()
         {
-            Database.EnsureDeleted();
             Database.EnsureCreated();
         }
 

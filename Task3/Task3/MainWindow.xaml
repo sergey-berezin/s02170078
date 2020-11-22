@@ -55,7 +55,7 @@
 
         <Button Content="Clear Data Base" Click="ClearDB" HorizontalAlignment="Left" Margin="154,58,0,0" VerticalAlignment="Top"/>
 
-        <TextBlock HorizontalAlignment="Left" Margin="433,273,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="285"><Run Text="Информация о количестве "/><Run Language="ru-ru" Text="распознанных "/><Run Text="картинок"/><Run Text=":"/></TextBlock>
+        <TextBlock HorizontalAlignment="Left" Margin="433,273,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="285"><Run Text="Информация о повторных обращениях: "/></TextBlock>
 
         <Button Content="Обновить" Click="Refresh" HorizontalAlignment="Left" Margin="692,279,0,0" VerticalAlignment="Top" Height="26" Width="58"/>
 
