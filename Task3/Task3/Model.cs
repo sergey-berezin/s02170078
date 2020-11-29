@@ -45,6 +45,7 @@ namespace Task3
                 Number.Add(new OutputNumber { Label = label, Number = 0 });
             }
             Labels = classifier.classLabels;
+            classifier.Result += UpdateResult;
         }
 
         public ObservableCollection<OutputPrediction> All { get; set; }
@@ -85,64 +86,57 @@ namespace Task3
                 }
             }
         }
+        private void UpdateResult(PredictionResult predictionResult)
+        {
+            CurDispatcher.Invoke(() =>
+            {
+                AddToInterface(predictionResult);
+            }, DispatcherPriority.Render);
+
+            lock (CurDbContext)
+            {
+                Blob blob = new Blob { ImageBytes = File.ReadAllBytes(predictionResult.Path) };
+                CurDbContext.Blobs.Add(blob);
+                CurDbContext.SaveChanges();
+                CurDbContext.Images.Add(new Image
+                {
+                    Hash = GetHashCode(File.ReadAllBytes(predictionResult.Path)),
+                    Prediction = predictionResult.Prediction,
+                    RepeatedCallsNumber = 0,
+                    BlobId = blob.Id
+                });
+                CurDbContext.SaveChanges();
+            }
+        }
 
         public async Task Start()
         {
+            List<FileInfo> imagesForRecognition = new List<FileInfo> { };
+
             DirectoryInfo dir = new DirectoryInfo(FolderPath);
+
+            var tasks = new List<Task>();
 
             classifier.CancelTokenSource = new CancellationTokenSource();
             CancellationToken token = classifier.CancelTokenSource.Token;
-
-            var tasks = new List<Task>();
 
             foreach (var curImg in dir.GetFiles())
             {
                 tasks.Add(Task.Factory.StartNew((img) =>
                 {
-
-                    FileInfo pImg = (FileInfo)img;
-
-                    PredictionResult predictionResult = ImageInDB(pImg);
-
-                    if (predictionResult == null)
-                    {
-
-                        predictionResult = new PredictionResult { Path = pImg.FullName, File = pImg.Name, Prediction = classifier.Predict(pImg.FullName) };
-                        lock (CurDbContext)
-                        {
-                            Blob blob = new Blob { ImageBytes = File.ReadAllBytes(predictionResult.Path) };
-                            CurDbContext.Blobs.Add(blob);
-                            CurDbContext.SaveChanges();
-                            CurDbContext.Images.Add(new Image
-                            {
-                                Hash = GetHashCode(File.ReadAllBytes(predictionResult.Path)),
-                                Prediction = predictionResult.Prediction,
-                                RepeatedCallsNumber = 0,
-                                BlobId = blob.Id
-                            });
-                            CurDbContext.SaveChanges();
-                        }
-                    }
-
+                    PredictionResult predictionResult = ImageInDB(curImg);
                     CurDispatcher.Invoke(() =>
                     {
-                        if (SelectedItem != null && predictionResult.Prediction == SelectedItem)
+                        if (predictionResult == null)
                         {
-                            Selected.Add(new OutputPrediction { Prediction = predictionResult.Prediction, Image = new BitmapImage(new Uri(predictionResult.Path)) });
+                            imagesForRecognition.Add(curImg);
                         }
-                        foreach (var i in Number)
+                        else
                         {
-                            if (i.Label == predictionResult.Prediction)
-                            {
-                                i.Number++;
-                            }
+                            AddToInterface(predictionResult);
                         }
-                        All.Add(new OutputPrediction { Prediction = predictionResult.Prediction, Image = new BitmapImage(new Uri(predictionResult.Path)) });
-
                     }, DispatcherPriority.Render);
-
                 }, curImg, token));
-
             }
 
             Task t = Task.WhenAll(tasks);
@@ -155,6 +149,24 @@ namespace Task3
             {
 
             }
+
+            await classifier.PredictAll(imagesForRecognition);
+        }
+
+        public void AddToInterface(PredictionResult predictionResult)
+        {
+            if (SelectedItem != null && predictionResult.Prediction == SelectedItem)
+            {
+                Selected.Add(new OutputPrediction { Prediction = predictionResult.Prediction, Image = new BitmapImage(new Uri(predictionResult.Path)) });
+            }
+            foreach (var i in Number)
+            {
+                if (i.Label == predictionResult.Prediction)
+                {
+                    i.Number++;
+                }
+            }
+            All.Add(new OutputPrediction { Prediction = predictionResult.Prediction, Image = new BitmapImage(new Uri(predictionResult.Path)) });
         }
 
         public PredictionResult ImageInDB(FileInfo pImg)
