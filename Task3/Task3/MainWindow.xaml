@@ -1,0 +1,74 @@
+﻿<Window x:Class="Task3.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Task3"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Button Content="Stop" Click="Stop" HorizontalAlignment="Left" Margin="104,58,0,0" VerticalAlignment="Top"/>
+        <Button Content="Start" Click="Start" HorizontalAlignment="Left" Margin="51,58,0,0" VerticalAlignment="Top"/>
+        <Button Content="Open" Click="Open" HorizontalAlignment="Left" Margin="51,19,0,0" VerticalAlignment="Top"/>
+
+        <ComboBox Name ="cbSelectClass" ItemsSource="{Binding Labels}"  SelectedItem="{Binding SelectedItem}" HorizontalAlignment="Left" Margin="537,57,0,0" VerticalAlignment="Top" Width="120"/>
+
+        <TextBlock Text="{Binding FolderPath}" HorizontalAlignment="Left" Margin="212,22,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="18" Width="506"><Run Language="ru-ru"/></TextBlock>
+
+        <ListBox ItemsSource="{Binding All}"  Name="lbAll" Margin="51,113,464,178">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Margin="0 0 0 5">
+                        <TextBlock Text="{Binding Prediction}"/>
+                        <Image Source="{Binding Image}" HorizontalAlignment="Center" Stretch="Uniform" Width="28" Height="28"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <ListBox ItemsSource="{Binding Number}"  Name="lbNumber" Margin="51,310,464,10">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Margin="0 0 0 5">
+                        <TextBlock Text="{Binding Label}"/>
+                        <TextBlock Text="{Binding Number}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <ListBox ItemsSource="{Binding Selected}"  x:Name="lbSelected" Margin="433,113,82,178">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Margin="0 0 0 5">
+                        <Image Source="{Binding Image}" HorizontalAlignment="Center" Stretch="Uniform" Width="28" Height="28"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <TextBlock HorizontalAlignment="Left" Margin="51,92,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="285"><Run Language="ru-ru" Text="Распознанные картинки"/><Run Text=":"/></TextBlock>
+        <TextBlock HorizontalAlignment="Left" Margin="433,95,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="357" Height="23"><Run Language="ru-ru" Text="Распознанные картинки"/><Run Text=", "/><Run Language="ru-ru" Text="относящиеся к выбранному классу"/><Run Text=":"/></TextBlock>
+        <TextBlock HorizontalAlignment="Left" Margin="51,273,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="285"><Run Text="Информация о количестве "/><Run Language="ru-ru" Text="распознанных "/><Run Text="картинок"/><Run Text=":"/></TextBlock>
+        <TextBlock HorizontalAlignment="Left" Margin="100,22,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="108" Height="17"><Run Language="ru-ru" Text="Выбранная папка"/><Run Text=":"/></TextBlock>
+        <TextBlock HorizontalAlignment="Left" Margin="433,58,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="104" Text="Выбирите класс:" Height="22"/>
+
+        <Button Content="Clear Data Base" Click="ClearDB" HorizontalAlignment="Left" Margin="154,58,0,0" VerticalAlignment="Top"/>
+
+        <TextBlock HorizontalAlignment="Left" Margin="433,273,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="285"><Run Text="Информация о повторных обращениях: "/></TextBlock>
+
+        <Button Content="Обновить" Click="Refresh" HorizontalAlignment="Left" Margin="692,279,0,0" VerticalAlignment="Top" Height="26" Width="58"/>
+
+        <ListBox ItemsSource="{Binding RepeatedCalls}"  x:Name="lbRepeatedCalls" Margin="433,318,100,10">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Margin="0 0 0 5">
+                        <TextBlock Text="{Binding Number}"/>
+                        <Image Source="{Binding Image}" HorizontalAlignment="Center" Stretch="Uniform" Width="28" Height="28"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+    </Grid>
+</Window>

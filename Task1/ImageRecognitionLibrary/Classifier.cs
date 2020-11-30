@@ -33,8 +33,7 @@ namespace ImageRecognitionLibrary
 
         public event MessageHandler Message;
 
-
-        private CancellationTokenSource CancelTokenSource;
+        public CancellationTokenSource CancelTokenSource;
 
         public string ModelFolder = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + "\\Model";
 
@@ -60,6 +59,36 @@ namespace ImageRecognitionLibrary
         {
             Message?.Invoke("Остановка");
             CancelTokenSource.Cancel();
+        }
+
+        public async Task PredictAll(List<FileInfo> imagesPaths)
+        {
+            CancelTokenSource = new CancellationTokenSource();
+
+            CancellationToken token = CancelTokenSource.Token;
+
+            var tasks = new List<Task>();
+
+            foreach (var curImg in imagesPaths)
+            {
+                tasks.Add(Task.Factory.StartNew((img) =>
+                {
+                    FileInfo pImg = (FileInfo)img;
+                    PredictionResult result = new PredictionResult { Path = pImg.FullName, File = pImg.Name, Prediction = Predict(pImg.FullName) };
+                    Result?.Invoke(result);
+                }, curImg, token));
+            }
+
+            Task t = Task.WhenAll(tasks);
+
+            try
+            {
+                await t;
+            }
+            catch (OperationCanceledException ex)
+            {
+                Message?.Invoke("Процесс был прекращен.");
+            }
         }
 
         public async Task PredictAll(string targetDirectory)
