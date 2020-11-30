@@ -103,7 +103,7 @@ namespace Task3
                     Hash = GetHashCode(File.ReadAllBytes(predictionResult.Path)),
                     Prediction = predictionResult.Prediction,
                     RepeatedCallsNumber = 0,
-                    BlobId = blob.Id
+                    Blob = blob
                 });
                 CurDbContext.SaveChanges();
             }
@@ -179,12 +179,13 @@ namespace Task3
 
                 if (sameHash != null)
                 {
+                    sameHash.ToList();
                     foreach (var i in sameHash.ToList())
                     {
-                        var sameBlob = CurDbContext.Blobs.Find(i.BlobId);
-                        if (sameBlob != null && data.SequenceEqual(sameBlob.ImageBytes))
+                        CurDbContext.Entry(i).Reference(p => p.Blob).Load();
+                        if (data.SequenceEqual(i.Blob.ImageBytes))
                         {
-                            CurDbContext.Images.Where(x => x.BlobId == sameBlob.Id).First().RepeatedCallsNumber++;
+                            i.RepeatedCallsNumber++;
                             CurDbContext.SaveChanges();
                             return new PredictionResult { Path = pImg.FullName, File = pImg.Name, Prediction = i.Prediction };
                         }
@@ -206,7 +207,7 @@ namespace Task3
                         RepeatedCalls.Add(new OutputRepeatedCalls
                         {
                             Image = ToImage(i.ImageBytes),
-                            Number = CurDbContext.Images.Where(x => x.BlobId == i.Id).First().RepeatedCallsNumber
+                            Number = CurDbContext.Images.Where(x => x.Blob == i).First().RepeatedCallsNumber
                         });
                     }
                 }

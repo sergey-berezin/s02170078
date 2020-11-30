@@ -22,7 +22,7 @@ namespace Task3
 
         public int RepeatedCallsNumber { get; set; }
 
-        public int BlobId { get; set; }
+        public Blob Blob { get; set; }
     }
 
     public class ImageRecognitionContext : DbContext
